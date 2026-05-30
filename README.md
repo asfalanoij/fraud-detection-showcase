@@ -11,6 +11,11 @@ The cornerstone of this showcase is the **Interactive Analytics Report**, locate
 - **Content**: Consolidates rich data visualizations across all phases of the project into a single, cohesive document.
 - **Workflows**: Documents the complete end-to-end technical workflows, from raw data ingestion to executive KPI aggregation, making complex machine learning pipelines accessible to business stakeholders.
 
+- **Primary objective**: expected net cost (net $ saved) at a calibrated, governed threshold. The number internalizes the FN/FP asymmetry. False Negative - Fraud Missed while False Positive - false alarm. We aim to catch Fraud:  TP, True Positive and leave normal business, True Negative. 
+- **Two guardrail readouts**: Recall (coverage) with a precision floor tied, plus a false-decline rate cap (legit customers wrongly blocked). Recall alone, unconstrained, will be so costly.
+PR-AUC stays as the DS quality gate and drift alarm.
+
+
 ## Key Business Metrics & Terminology
 
 Bridging the gap between data science and business operations requires clear metrics. The following concepts and abbreviations are utilized throughout the pipeline:
@@ -101,6 +106,13 @@ uv run pytest
 ```
 
 *Note: The raw dataset is external. Download `creditcard.csv` (Kaggle: `mlg-ulb/creditcardfraud`) into `data/raw/` prior to running `01_ingestion_duckdb.ipynb`.*
+
+
+- **As an internal auditor**: three controls I'd want evidenced regardless of the metric debate:
+
+Who owns the cost function? what are the business assumptions and the model facts. Is there any review cadence — they're a control input, not a constant.
+Is the threshold governed and monitored? A threshold chosen on 2019 validation data drifts. Where's the recalibration trigger?
+Calibration = auditability. The isotonic calibration >> "0.1875 means a real 18.75% fraud probability." Uncalibrated scores make the threshold arbitrary and the decision indefensible in an audit.
 
 ## Acknowledgments
 Built on foundational concepts adapted from @amalinadhi and @davidsirait (Pacmann.io, 2024). Original dataset provisioned by Université Libre de Bruxelles (ULB) via Kaggle.
