@@ -1,0 +1,20 @@
+<!doctype html><html><head><meta charset="utf-8">
+<title>Fraud Detection — Business Impact</title>
+<style>body{font-family:system-ui;margin:40px;max-width:900px;color:#1a1a1a}
+.kpi{font-size:2.4rem;font-weight:700;color:#0a7a55}
+h1{border-bottom:3px solid #0a7a55;padding-bottom:8px}
+ul{line-height:1.8}</style></head><body>
+<h1>Fraud Detection — Business Impact</h1>
+<p class="kpi">$2,497 net saved</p>
+<ul>
+  <li>Decision threshold: 0.1875</li>
+  <li>Fraud value caught: 64.0%</li>
+  <li>Recall: 89.8% &middot; Precision: 73.3%</li>
+</ul>
+<h2>Methodology</h2>
+<p>Leakage-safe split, calibrated probabilities, cost-optimal threshold
+(FN = lost transaction amount, FP = $4 analyst review).</p>
+<img src="../figures/threshold_sweep.png" style="max-width:100%"><img src="../figures/confusion_matrices.png" style="max-width:100%"><img src="../figures/diagnostics.png" style="max-width:100%"><img src="../figures/robustness_segments.png" style="max-width:100%"><img src="../figures/shap_summary.png" style="max-width:100%">
+<h2>Why transactions are flagged (SHAP)</h2>
+<ol><li>V14</li><li>V4</li><li>V12</li><li>V10</li><li>V11</li><li>V3</li><li>V7</li><li>V16</li></ol>
+</body></html>
