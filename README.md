@@ -1,4 +1,5 @@
 # Cost-Optimized Fraud Detection: Analytical Showcase
+<img width="881" height="253" alt="Screenshot 2026-05-31 at 05 19 13" src="https://github.com/user-attachments/assets/126c38c1-65dd-4bed-a6ba-3d3e1085fda1" />
 
 An end-to-end analytical pipeline and machine learning implementation for credit card fraud detection. Utilizing the Kaggle `creditcardfraud` dataset (284,807 transactions, 0.172% fraud), this project focuses on **cost-optimal thresholding** rather than pure statistical maximization. The system is designed to minimize net business losses by balancing fraud recovery against the operational cost of analyst reviews.
 
@@ -19,6 +20,21 @@ Bridging the gap between data science and business operations requires clear met
 - **Precision**: The percentage of flagged alerts that are genuinely fraudulent. *Business Value*: Drives operational efficiency by minimizing "alert fatigue" and reducing the labor costs associated with manual analyst reviews.
 - **SHAP (SHapley Additive exPlanations)**: A game-theoretic framework for explaining machine learning outputs. *Business Value*: Provides transparency and auditability, empowering risk management teams to understand exactly *why* a specific transaction was blocked or flagged.
 - **PCA (Principal Component Analysis)**: A statistical procedure used to convert observations into uncorrelated variables. *Context*: In this dataset, PCA components (V1-V28) protect customer privacy and confidentiality while preserving predictive variance.
+
+## The Data - Fact Findings
+Three views of the same 24-hour cycle:
+- **Volume** — most transactions happen 9am–11pm.
+- **Fraud rate %** — risk-by-row spikes 2–5am (card-testing pattern).
+- **$ loss** — even rare fraud at busy hours can dominate raw dollar loss.
+<img width="1489" height="396" alt="image" src="https://github.com/user-attachments/assets/ad1d4de9-52d5-42c9-afdf-5959354f2196" />
+
+Most of the fraudulent rate is petty. The rate peaks on **small amounts** (testing stolen cards) with a long tail above $100. Histogram, ECDF, and bucketed-rate panels triangulate the same story.
+<img width="1490" height="397" alt="image" src="https://github.com/user-attachments/assets/89139837-8354-4d52-b1f7-ea4523d5f4dd" />
+
+
+The Signals - the most important features
+<img width="1251" height="589" alt="image" src="https://github.com/user-attachments/assets/7151d72e-7c9e-42af-919c-08d81c68b4c5" />
+
 
 ## Analytical Pipeline & Technical Workflows (Notebooks)
 
