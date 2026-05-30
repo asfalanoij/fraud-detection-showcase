@@ -1,5 +1,13 @@
 *__pycache__
 *.ipynb_checkpoints
+.DS_Store
+.vscode/
+.kaggle/
+.venv/
 data/
 models/
 log/
+reports/figures/*.png
+*.pkl
+*.duckdb
+creditcardfraud.zip

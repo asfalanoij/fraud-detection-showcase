@@ -1,0 +1,20 @@
+<!doctype html><html><head><meta charset="utf-8">
+<title>Fraud Detection — Business Impact</title>
+<style>body{font-family:system-ui;margin:40px;max-width:900px;color:#1a1a1a}
+.kpi{font-size:2.4rem;font-weight:700;color:#0a7a55}
+h1{border-bottom:3px solid #0a7a55;padding-bottom:8px}
+ul{line-height:1.8}</style></head><body>
+<h1>Fraud Detection — Business Impact</h1>
+<p class="kpi">${{ net_saved|money }} net saved</p>
+<ul>
+  <li>Decision threshold: {{ threshold }}</li>
+  <li>Fraud value caught: {{ (fraud_caught_pct*100)|round(1) }}%</li>
+  <li>Recall: {{ (recall*100)|round(1) }}% &middot; Precision: {{ (precision*100)|round(1) }}%</li>
+</ul>
+<h2>Methodology</h2>
+<p>Leakage-safe split, calibrated probabilities, cost-optimal threshold
+(FN = lost transaction amount, FP = $4 analyst review).</p>
+{% for f in figures %}<img src="{{ f }}" style="max-width:100%">{% endfor %}
+<h2>Why transactions are flagged (SHAP)</h2>
+<ol>{% for s in shap_top %}<li>{{ s }}</li>{% endfor %}</ol>
+</body></html>
