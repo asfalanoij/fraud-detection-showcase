@@ -630,7 +630,7 @@ wheels = [
 [[package]]
 name = "fraud-detection-showcase"
 version = "0.1.0"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "duckdb" },
     { name = "imbalanced-learn" },
@@ -651,6 +651,8 @@ dependencies = [
 
 [package.optional-dependencies]
 dev = [
+    { name = "ipykernel" },
+    { name = "nbformat" },
     { name = "pytest" },
     { name = "pytest-cov" },
     { name = "ruff" },
@@ -660,10 +662,12 @@ dev = [
 requires-dist = [
     { name = "duckdb", specifier = ">=1.0" },
     { name = "imbalanced-learn", specifier = ">=0.12" },
+    { name = "ipykernel", marker = "extra == 'dev'", specifier = ">=6.29" },
     { name = "jinja2", specifier = ">=3.1" },
     { name = "jupyter", specifier = ">=1.1" },
     { name = "lightgbm", specifier = ">=4.5" },
     { name = "matplotlib", specifier = ">=3.9" },
+    { name = "nbformat", marker = "extra == 'dev'", specifier = ">=5.10" },
     { name = "pandas", specifier = ">=2.2" },
     { name = "plotly", specifier = ">=5.23" },
     { name = "polars", specifier = ">=1.0" },
