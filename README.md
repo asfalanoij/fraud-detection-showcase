@@ -1,67 +1,90 @@
-# Credit-card fraud detection
+# Cost-Optimized Fraud Detection: Analytical Showcase
 
-Cost-optimal fraud scoring on the Kaggle `creditcardfraud` set (284,807 transactions, 0.172% fraud). Tuned to save money, not to win on ROC-AUC.
+An end-to-end analytical pipeline and machine learning implementation for credit card fraud detection. Utilizing the Kaggle `creditcardfraud` dataset (284,807 transactions, 0.172% fraud), this project focuses on **cost-optimal thresholding** rather than pure statistical maximization. The system is designed to minimize net business losses by balancing fraud recovery against the operational cost of analyst reviews.
 
-## Results (held-out test set)
+## Interactive Management Report
 
-| | |
+The cornerstone of this showcase is the **Interactive Analytics Report**, located at `reports/html/index.html`. 
+
+- **Design**: Styled with a clean, professional Notion-inspired aesthetic, utilizing concise typography and a structured sidebar for seamless navigation.
+- **Content**: Consolidates rich data visualizations across all phases of the project into a single, cohesive document.
+- **Workflows**: Documents the complete end-to-end technical workflows, from raw data ingestion to executive KPI aggregation, making complex machine learning pipelines accessible to business stakeholders.
+
+## Key Business Metrics & Terminology
+
+Bridging the gap between data science and business operations requires clear metrics. The following concepts and abbreviations are utilized throughout the pipeline:
+
+- **PR-AUC (Precision-Recall Area Under Curve)**: Evaluates the trade-off between detecting fraud and issuing false alarms. *Business Value*: The primary performance metric for highly imbalanced datasets, ensuring the model's accuracy isn't artificially inflated by the overwhelming number of legitimate transactions.
+- **Recall (Sensitivity)**: The percentage of total fraudulent transactions successfully intercepted. *Business Value*: Directly correlates to mitigated financial loss and protected revenue.
+- **Precision**: The percentage of flagged alerts that are genuinely fraudulent. *Business Value*: Drives operational efficiency by minimizing "alert fatigue" and reducing the labor costs associated with manual analyst reviews.
+- **SHAP (SHapley Additive exPlanations)**: A game-theoretic framework for explaining machine learning outputs. *Business Value*: Provides transparency and auditability, empowering risk management teams to understand exactly *why* a specific transaction was blocked or flagged.
+- **PCA (Principal Component Analysis)**: A statistical procedure used to convert observations into uncorrelated variables. *Context*: In this dataset, PCA components (V1-V28) protect customer privacy and confidentiality while preserving predictive variance.
+
+## Analytical Pipeline & Technical Workflows (Notebooks)
+
+The project is structured across a sequential series of analytical notebooks, ensuring reproducibility and logical flow:
+
+- **`00_overview.ipynb`**: High-level project orchestration and objective setting.
+- **`01_ingestion_duckdb.ipynb`**: Efficient raw data ingestion and profiling via DuckDB. Implements rigorous pre-split de-duplication to prevent data leakage.
+- **`02_eda.ipynb`**: Exploratory Data Analysis. Visual inspection of distributions, feature correlations, and the fundamental class imbalance.
+- **`03_data_quality.ipynb`**: Data integrity validation, missing value checks, and baseline anomaly detection.
+- **`04_preprocessing.ipynb`**: Robust data scaling and transformation. All scalers are strictly fitted on training data to simulate real-world deployment constraints.
+- **`05_feature_engineering.ipynb`**: Derivation of cyclical temporal features and log-transformed transaction amounts to capture complex, non-linear fraud signals.
+- **`06_ml_prediction.ipynb`**: Core modeling leveraging XGBoost. Prioritizes isotonic regression to yield meaningful, well-calibrated probability scores rather than raw, uncalibrated margins.
+- **`07_business_impact.ipynb`**: Translating model probabilities into financial outcomes. Sweeps for the optimal decision threshold based on a defined cost function (e.g., $4 cost per false positive manual review). Features SHAP-based interpretability.
+- **`08_unsupervised_appendix.ipynb`**: Evaluates Isolation Forests as a baseline methodology for environments lacking labeled fraud data.
+- **`09_business_insights.ipynb`**: Final aggregation of KPIs, summarizing net financial impact and model robustness for executive stakeholders.
+
+## Business Impact & Results (Held-out Test Set)
+
+The model threshold (0.1875) was strictly derived by maximizing net dollars saved on a validation set, assuming a missed fraud costs the transaction amount and a false alarm costs $4 in operational review time.
+
+| Metric | Performance |
 |---|---|
-| Net saved vs no model | $2,497 |
-| Fraud cases caught (recall) | 89.8% |
-| Fraud dollars recovered | 64.0% |
-| Precision | 73.3% |
-| PR-AUC | 0.886 |
+| **Net Saved vs. Baseline** | $2,497 |
+| **Fraud Cases Caught (Recall)** | 89.8% |
+| **Fraud Dollars Recovered** | 64.0% |
+| **Precision** | 73.3% |
+| **PR-AUC** | 0.886 |
 
 ![Confusion matrices at three thresholds on the test set](reports/figures/confusion_matrices.png)
 
-Recall is 89.8% but only 64% of fraudulent *dollars* come back. The misses skew to high-value transactions. That gap is the next piece of work, not another decimal of AUC.
+*Observation*: While the system intercepts 89.8% of fraudulent events, it recovers 64.0% of the associated financial value. This indicates that missed fraud events skew toward higher transaction values—a critical insight prioritizing future feature engineering over marginal statistical improvements.
 
-The threshold (0.1875) is picked by sweeping net dollars saved on validation: a missed fraud costs the transaction amount, a false alarm costs $4 of analyst time. Probabilities are isotonic-calibrated so the threshold is meaningful.
+## Architecture & Data Flow
 
-## Pipeline
-
-```
-raw CSV -> DuckDB (profile, de-dup) -> Parquet -> stratified split
-        -> preprocess (fit on train only) -> calibrated XGBoost
-        -> cost-optimal threshold -> report
+```text
+Raw CSV -> DuckDB (Profile & Deduplicate) -> Parquet -> Stratified Split
+        -> Preprocessor (Fit on Train) -> Calibrated XGBoost
+        -> Cost-Optimal Thresholding -> Interactive HTML Report
 ```
 
-Nothing is fit on validation or test. Imbalance is handled with `scale_pos_weight`, not by throwing away the majority class. De-duplication (1,081 exact dupes) happens before the split so the same row can't land in two partitions.
+- **Data Leakage Prevention**: De-duplication (1,081 exact duplicates) is executed prior to the stratified split, ensuring no overlap between training, validation, and test partitions.
+- **Imbalance Strategy**: Handled intrinsically via `scale_pos_weight` rather than destructive sampling methods (like undersampling the majority class).
 
-Notebooks, in order:
+## Repository Structure
 
-`00` overview · `01` ingestion · `02` EDA · `03` data quality · `04` preprocessing · `05` feature engineering · `06` model · `07` business impact + SHAP · `08` isolation-forest appendix · `09` executive report
-
-## Run it
-
+```text
+src/fraud/   # Core pipeline modules: config, io, data, features, modeling, report
+tests/       # Pytest suite (~90% coverage on core logic)
+notebooks/   # 00-09 sequential analytical workflows
+reports/     # Generated figures and the consolidated interactive HTML report
+docs/        # System design specifications and architectural plans
 ```
+
+## Reproduction
+
+Environment setup is managed via `uv`:
+
+```bash
+# Install dependencies
 uv sync --extra dev
-uv run pytest            # 14 tests, ~90% on src/
+
+# Execute unit tests
+uv run pytest
 ```
 
-In VS Code: open a notebook, select the `Python (fraud-detection .venv)` kernel, Run All. The notebooks set their own working directory, so they run from anywhere.
+*Note: The raw dataset is external. Download `creditcard.csv` (Kaggle: `mlg-ulb/creditcardfraud`) into `data/raw/` prior to running `01_ingestion_duckdb.ipynb`.*
 
-The dataset is not in the repo. Download `creditcard.csv` (Kaggle: `mlg-ulb/creditcardfraud`) into `data/raw/`. Notebook `01` does the rest.
-
-The management report is `reports/html/index.html`.
-
-## Layout
-
-```
-src/fraud/   pipeline code: config, io, data, quality, features,
-             preprocess, modeling, evaluate, costs, report
-tests/       pytest
-notebooks/   00-09, narrative over src/
-reports/     figures + html/index.html
-docs/        design spec + implementation plan
-```
-
-## Notes
-
-- Engineered features (cyclical hour, log amount) gave a negative PR-AUC lift on a linear model. Kept for interpretability; the gradient-boosted model ships.
-- Isolation Forest at the same alert budget catches 16 frauds against the model's 44. Worth it only when you have no labels.
-- V14, V4, V12 carry most of the score (SHAP). They are anonymized PCA components, so there is no business meaning beyond "these directions separate fraud."
-
-## Credit
-
-Rebuilt from an earlier learning project adapted from @amalinadhi and @davidsirait (Pacmann.io, 2024). Dataset: Université Libre de Bruxelles, via Kaggle.
+## Acknowledgments
+Built on foundational concepts adapted from @amalinadhi and @davidsirait (Pacmann.io, 2024). Original dataset provisioned by Université Libre de Bruxelles (ULB) via Kaggle.
