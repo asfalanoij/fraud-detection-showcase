@@ -1,20 +1,289 @@
-<!doctype html><html><head><meta charset="utf-8">
-<title>Fraud Detection — Business Impact</title>
-<style>body{font-family:system-ui;margin:40px;max-width:900px;color:#1a1a1a}
-.kpi{font-size:2.4rem;font-weight:700;color:#0a7a55}
-h1{border-bottom:3px solid #0a7a55;padding-bottom:8px}
-ul{line-height:1.8}</style></head><body>
-<h1>Fraud Detection — Business Impact</h1>
-<p class="kpi">$2,497 net saved</p>
-<ul>
-  <li>Decision threshold: 0.1875</li>
-  <li>Fraud value caught: 64.0%</li>
-  <li>Recall: 89.8% &middot; Precision: 73.3%</li>
-</ul>
-<h2>Methodology</h2>
-<p>Leakage-safe split, calibrated probabilities, cost-optimal threshold
-(FN = lost transaction amount, FP = $4 analyst review).</p>
-<img src="../figures/threshold_sweep.png" style="max-width:100%"><img src="../figures/confusion_matrices.png" style="max-width:100%"><img src="../figures/diagnostics.png" style="max-width:100%"><img src="../figures/robustness_segments.png" style="max-width:100%"><img src="../figures/shap_summary.png" style="max-width:100%">
-<h2>Why transactions are flagged (SHAP)</h2>
-<ol><li>V14</li><li>V4</li><li>V12</li><li>V10</li><li>V11</li><li>V3</li><li>V7</li><li>V16</li></ol>
-</body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Fraud Detection &middot; Business Impact</title>
+  <style>
+    :root {
+      --bg-main: #ffffff;
+      --bg-sidebar: #f7f7f5;
+      --text-main: #37352f;
+      --text-muted: #787774;
+      --border: #e9e9e7;
+      --accent-bg: #f4fbf8;
+      --accent-border: #0f7b6c;
+    }
+    
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol";
+      font-size: 14px;
+      color: var(--text-main);
+      background-color: var(--bg-main);
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+      line-height: 1.5;
+    }
+
+    /* Sidebar Styles */
+    .sidebar {
+      width: 280px;
+      background-color: var(--bg-sidebar);
+      border-right: 1px solid var(--border);
+      padding: 32px 16px;
+      box-sizing: border-box;
+      overflow-y: auto;
+      flex-shrink: 0;
+    }
+    .sidebar h2 {
+      font-size: 14px;
+      margin-top: 0;
+      margin-bottom: 24px;
+      padding-left: 8px;
+      font-weight: 600;
+      border: none;
+    }
+    .sidebar h3 {
+      font-size: 11px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+      margin-top: 24px;
+      margin-bottom: 8px;
+      padding-left: 8px;
+    }
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .sidebar li {
+      padding: 6px 8px;
+      margin: 2px 0;
+      border-radius: 4px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+    .sidebar li a {
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .sidebar li:hover {
+      background-color: rgba(0,0,0,0.04);
+      color: var(--text-main);
+    }
+    .badge {
+      background: #e3e2e0;
+      color: var(--text-main);
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 12px;
+      font-family: monospace;
+    }
+
+    /* Main Content Styles */
+    .main {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 48px 60px 100px 60px;
+      box-sizing: border-box;
+    }
+    .content-wrapper {
+      max-width: 850px;
+      margin: 0 auto;
+    }
+    
+    h1 { font-size: 40px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.02em; }
+    h2 { font-size: 24px; font-weight: 600; margin-top: 48px; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+    h3 { font-size: 18px; font-weight: 600; margin-top: 32px; margin-bottom: 12px; }
+    p, li { color: var(--text-main); }
+    ul, ol { padding-left: 20px; }
+    
+    .kpi-container {
+      display: flex;
+      gap: 16px;
+      margin: 32px 0;
+    }
+    .kpi-box {
+      flex: 1;
+      background: var(--bg-main);
+      border: 1px solid var(--border);
+      padding: 20px;
+      border-radius: 6px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    }
+    .kpi-box.primary {
+      background: var(--accent-bg);
+      border-color: #b7e3da;
+    }
+    .kpi-value {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .kpi-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    img {
+      max-width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      margin: 12px 0;
+    }
+    .caption {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: -4px;
+      margin-bottom: 24px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    .code-inline {
+      font-family: monospace;
+      background: #f1f1ef;
+      padding: 2px 4px;
+      border-radius: 3px;
+      font-size: 12px;
+      color: #eb5757;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar">
+    <h2>💸 Fraud Detection</h2>
+    
+    <h3>Navigation</h3>
+    <ul>
+      <li><a href="#overview">Overview & KPIs</a></li>
+      <li><a href="#workflows">Pipeline Architecture</a></li>
+      <li><a href="#eda">Exploratory Analysis</a></li>
+      <li><a href="#modeling">Diagnostics & Robustness</a></li>
+      <li><a href="#impact">Business Impact</a></li>
+    </ul>
+
+    <h3>Notebook Workflows</h3>
+    <ul>
+      <li><a href="#workflows"><span class="badge">01</span> Ingestion & Splits</a></li>
+      <li><a href="#workflows"><span class="badge">02</span> SQL EDA</a></li>
+      <li><a href="#workflows"><span class="badge">03</span> Data Quality</a></li>
+      <li><a href="#workflows"><span class="badge">04</span> Preprocessing</a></li>
+      <li><a href="#workflows"><span class="badge">05</span> Feature Eng.</a></li>
+      <li><a href="#workflows"><span class="badge">06</span> ML Prediction</a></li>
+      <li><a href="#workflows"><span class="badge">07</span> Explainability</a></li>
+    </ul>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main">
+    <div class="content-wrapper">
+      
+      <h1 id="overview">Fraud Detection Report</h1>
+      <p style="color: var(--text-muted); font-size: 16px;">End-to-end pipeline analysis: from raw data ingestion to business-cost optimization.</p>
+
+      <div class="kpi-container">
+        <div class="kpi-box primary">
+          <div class="kpi-label">Expected Net Value Saved</div>
+          <div class="kpi-value" style="color: var(--accent-border);">$2,497</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-label">Optimal Threshold</div>
+          <div class="kpi-value">0.1875</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-label">Precision / Recall</div>
+          <div class="kpi-value">73% / 90%</div>
+        </div>
+      </div>
+
+      <img src="../figures/dashboard_kpis.png" alt="KPI Dashboard">
+      <div class="caption">Dataset overview displaying raw transaction volume, baseline fraud rates, and total dollar exposure.</div>
+
+      <h2 id="workflows">Pipeline Architecture (Workflows)</h2>
+      <p>The system was built via a strictly ordered, leakage-safe pipeline:</p>
+      <ul>
+        <li><strong>01. Ingestion:</strong> Raw CSV loaded via DuckDB, saved to Parquet. <em>Stratified splitting</em> ensures the 0.17% fraud rate is preserved safely before any transformations occur.</li>
+        <li><strong>02. EDA:</strong> DuckDB SQL aggregations generated baseline dashboards (Time, Amount, Feature profiling) over the training partition.</li>
+        <li><strong>03. Data Quality:</strong> Exact duplicate rows identified and removed to prevent model bias.</li>
+        <li><strong>04. Preprocessing:</strong> A scikit-learn <span class="code-inline">ColumnTransformer</span> is fit <em>only</em> on the training set. It performs robust scaling on Amount and cyclical sin/cos encoding on Time. Class weights (577:1) are calculated here.</li>
+        <li><strong>05. Feature Engineering:</strong> PR-AUC comparison between Linear (LogReg) and Tree (XGBoost) models proved the utility of engineered numericals (log amount) for tree-based models.</li>
+        <li><strong>06. ML Prediction:</strong> XGBoost trained with class weights. Predictions passed through Isotonic Calibration. The decision threshold was tuned empirically to maximize Net Dollars, not F1/Accuracy.</li>
+        <li><strong>07-09. Business Impact:</strong> SHAP values calculated for transparency; metrics translated to Executive HTML.</li>
+      </ul>
+
+      <h2 id="eda">Exploratory Data Analysis</h2>
+      <p>Understanding the fundamental behavior of fraudulent transactions in our dataset.</p>
+      
+      <div class="grid">
+        <div>
+          <h3>Risk by Hour</h3>
+          <img src="../figures/dashboard_time.png" alt="Time Dashboard">
+          <div class="caption">Fraud rates spike between 2 AM and 5 AM, indicating automated card testing.</div>
+        </div>
+        <div>
+          <h3>Risk by Amount</h3>
+          <img src="../figures/dashboard_amount.png" alt="Amount Dashboard">
+          <div class="caption">Contrary to intuition, fraud heavily concentrates on small transactions.</div>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div>
+          <h3>Feature Separability</h3>
+          <img src="../figures/dashboard_features.png" alt="Features Dashboard">
+          <div class="caption">PCA components V14, V12, and V17 strongly isolate fraud distributions.</div>
+        </div>
+        <div>
+          <h3>Review Budget (Lorenz)</h3>
+          <img src="../figures/dashboard_lorenz.png" alt="Lorenz Curve">
+          <div class="caption">Reviewing only the top 1% riskiest transactions captures ~80% of actual fraud.</div>
+        </div>
+      </div>
+
+      <div class="grid" style="margin-top: 16px;">
+        <div><img src="../figures/fraud_rate_by_hour.png" alt="Fraud Rate by Hour"></div>
+        <div><img src="../figures/amount_by_class.png" alt="Amount by Class"></div>
+      </div>
+
+      <h2 id="modeling">Diagnostics & Robustness</h2>
+      <p>Validating that the XGBoost classifier behaves predictably and mathematically soundly before operationalizing.</p>
+
+      <h3>Cost-Optimal Threshold Sweep</h3>
+      <p>Default ML uses a 0.5 threshold. We swept the threshold against a real cost function: False Negatives cost the transaction amount, False Positives cost $4 in analyst time. The optimal cutoff is <strong>0.1875</strong>.</p>
+      <img src="../figures/threshold_sweep.png" alt="Threshold Sweep">
+
+      <h3>Calibration & Model Diagnostics</h3>
+      <p>Isotonic calibration ensures that a 20% model score corresponds to a literal 20% statistical probability of fraud, making expected-dollar calculations accurate.</p>
+      <img src="../figures/diagnostics.png" alt="Model Diagnostics">
+
+      <h3>Segment Stability</h3>
+      <p>Checking PR-AUC performance across different times of day and transaction sizes to ensure the model doesn't suffer from localized blind spots.</p>
+      <img src="../figures/robustness_segments.png" alt="Robustness Segments">
+
+      <h2 id="impact">Business Impact & Explainability</h2>
+      
+      <h3>Confusion Matrices & Dollar Consequences</h3>
+      <p>Statistical metrics translated to the P&L. At the optimal threshold, the model catches significant fraud value while strictly controlling analyst review overhead.</p>
+      <img src="../figures/confusion_matrices.png" alt="Confusion Matrices">
+
+      <h3>Global Feature Importance (SHAP)</h3>
+      <p>Explaining the "Black Box". Features V14, V4, and V12 are the dominant drivers of fraud flags, providing operations teams with concrete reasoning for blocked transactions.</p>
+      <img src="../figures/shap_summary.png" alt="SHAP Summary">
+
+    </div>
+  </main>
+
+</body>
+</html>
